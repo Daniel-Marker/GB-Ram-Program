@@ -86,10 +86,10 @@ JOYPAD_VECT:
 	DB	$00	; $00 - GameBoy
 
 	; $0147 (Cartridge type - all Color GameBoy cartridges are at least $19)
-	DB	$19	; $19 - ROM + MBC5
+	DB	$00	; $00 - ROM ONLY
 
 	; $0148 (ROM size)
-	DB	$01	; $01 - 512Kbit = 64Kbyte = 4 banks
+	DB	$00	; $00 - 256Kbit = 32KByte = 2 banks
 
 	; $0149 (RAM size)
 	DB	$00	; $00 - None

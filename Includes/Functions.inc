@@ -21,31 +21,32 @@ memcpy::
 	ret
 
 ;a = input: (n/a), output: (n/a)
-;bc = input: (n/a), output: (n/a)
+;b = input: map height (1-32), output: (n/a)
+;c = input: map width (1-32), output: (n/a)
 ;de = input: destination, output: (n/a)
 ;hl = input: source, output: (n/a)
 ;registers used: a, bc, de, hl
 load_map::
-	ld c, 18
-	
-.loop:
 	push bc
 	
-	ld bc, 20
+	ld b, 0
 	call memcpy
 	
-	ld a, 12
+	pop bc
+	
+	ld a, 32
+	sub a, c		;a = 32 - width
+	
 	add a, e
 	ld e, a
 	
 	ld a, 0
 	adc a, d
-	ld d, a
+	ld d, a			;de = end of line + (32-width), which puts de at the start of the next line
 	
 	
-	pop bc
-	dec c
-	jr nz, .loop
+	dec b
+	jr nz, load_map
 	
 	ret
 
@@ -60,12 +61,12 @@ move_arrow::
 
 	ld a, [arrow_pos]
 	or a
-	jr z, option_1
+	jr z, option_1		;0 or 0 = 0, so if arrow_pos = 0, then it will jump to option_1
 	cp 1
 	jr z, option_2
 	cp 2
 	jr z, option_3
-
+						;if the code gets to this point, arrow_pos is 3 or greater, so assume that it's 3
 option_4:	
 	ld a, cArrowOption4
 	jr move_sprite

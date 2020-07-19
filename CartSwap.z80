@@ -29,7 +29,7 @@ Start::
 	di
 	
 	xor a
-	ld [rLCDC], a
+	ld [rLCDC], a	;turn off the screen
 	
 	;setup palettes
 	ld a, cDefaultPalette
@@ -40,24 +40,26 @@ Start::
 	ld bc, cNumTiles * cTileSizeInBytes
 	ld hl, TileData
 	ld de, _VRAM
-	call memcpy
+	call memcpy			;load tile data into VRAM
 	
 	ld hl, Screen
 	ld de, _SCRN0
-	call load_map
+	ld b, 18
+	ld c, 20
+	call load_map		;load the map into VRAM
 	
 	ld a, cArrowTile
-	ld [_OAMRAM+2], a
+	ld [_OAMRAM+2], a	;set sprite 0 to use the arrow tile
 	
 	xor a
 	ld [arrow_pos], a
-	call move_arrow
+	call move_arrow		;position the arrow
 	
 	ld a, (LCDCF_ON | LCDCF_WIN9800 | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_OBJ8 | LCDCF_OBJON | LCDCF_BGON)
-	ld [rLCDC], a
+	ld [rLCDC], a	;turn the screen back on with the above setting
 	
 	ld a, IEF_VBLANK
-	ld [rIE], a
+	ld [rIE], a		;enable vblank interrupt
 	ei
 	
 Main::
