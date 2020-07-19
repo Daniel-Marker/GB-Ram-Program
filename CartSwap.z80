@@ -11,7 +11,9 @@
 ;****************************************************************************************************************************************************
 	; system includes
 	INCLUDE	"Hardware.inc"
-
+	INCLUDE "Assets/Screen.z80"
+	INCLUDE "Assets/Tiles.z80"
+	
 ;****************************************************************************************************************************************************
 ;*	user data (constants)
 ;****************************************************************************************************************************************************
@@ -141,8 +143,138 @@ JOYPAD_VECT:
 
 	SECTION "Program Start",ROM0[$0150]
 Start::
-	jp Start	;Program Code starts here.
+	di
 	
+	xor a
+	ld [rLCDC], a
+	
+	;setup palettes
+	ld a, %11100100
+	ld [rBGP], a
+	ld [rOBP0], a 
+	ld [rOBP1], a 
+	
+	ld bc, 38 * 16
+	ld hl, TileData
+	ld de, _VRAM
+	call memcpy
+	
+	ld hl, Screen
+	ld de, _SCRN0
+	call load_map
+	
+	ld a, 37
+	ld [_OAMRAM+2], a
+	
+	xor a
+	ld [arrow_pos], a
+	call move_arrow
+	
+	ld a, %10010011
+	ld [rLCDC], a
+	
+	ld a, IEF_VBLANK
+	ld [rIE], a
+	ei
+	
+Main::
+	halt
 
+	call move_arrow
+	
+	jr Main
+	
+;****************************************************************************************************************************************************
+;*	Functions
+;****************************************************************************************************************************************************
+SECTION "Functions", ROM0
+
+;a = (not used as input)
+;bc = number of bytes to copy
+;de = destination
+;hl = source
+memcpy::
+	ld a, [hl+]
+	ld [de], a
+	inc de
+	
+	dec bc
+	ld a, b
+	or c
+	jr nz, memcpy
+	
+	ret
+
+;a = (not used as input)
+;bc = (not used as input)
+;de = destination
+;hl = source
+load_map::
+	ld c, 18
+	
+.loop:
+	push bc
+	
+	ld bc, 20
+	call memcpy
+	
+	ld a, 12
+	add a, e
+	ld e, a
+	
+	ld a, 0
+	adc a, d
+	ld d, a
+	
+	
+	pop bc
+	dec c
+	jr nz, .loop
+	
+	ret
+
+;a = (not used as input)
+;bc = (not used as input)
+;de = (not used as input)
+;hl = (not used as input)
+move_arrow::
+	ld a, 16 + 8 * 3
+	ld [_OAMRAM + 1], a
+
+	ld a, [arrow_pos]
+	or a
+	jr z, option_1
+	cp 1
+	jr z, option_2
+	cp 2
+	jr z, option_3
+
+option_4:	
+	ld a, 10*8 + 16
+	jr move_sprite
+	
+option_1:
+	ld a, 7*8 + 16
+	jr move_sprite
+	
+option_2:
+	ld a, 8*8 + 16
+	jr move_sprite
+
+option_3:
+	ld a, 9*8 + 16
+	
+move_sprite:
+	ld [_OAMRAM], a
+	
+	ret
+
+;****************************************************************************************************************************************************
+;*	RAM Variables
+;****************************************************************************************************************************************************
+	
+SECTION "RAM Vars",WRAM0[$C000]
+arrow_pos:
+db
 
 ;*** End Of File ***
