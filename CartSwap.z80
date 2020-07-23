@@ -42,6 +42,11 @@ Start::
 	ld de, _VRAM
 	call memcpy			;load tile data into VRAM
 	
+	xor a
+	ld bc, $E000-$C000
+	ld de, _RAM
+	call memset
+	
 	ld hl, Screen
 	ld de, _SCRN0
 	ld b, 18
@@ -53,7 +58,7 @@ Start::
 	
 	xor a
 	ld [arrow_pos], a
-	call move_arrow		;position the arrow
+	call handle_arrow		;position the arrow
 	
 	ld a, (LCDCF_ON | LCDCF_WIN9800 | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_OBJ8 | LCDCF_OBJON | LCDCF_BGON)
 	ld [rLCDC], a	;turn the screen back on with the above setting
@@ -66,31 +71,7 @@ Main::
 	halt
 	
 	call poll_input
-	ld a, [input_pressed]
-	
-	bit 6, a
-	jr nz, arrow_up
-	bit 7, a
-	jr nz, arrow_down
-	jr end
-
-arrow_up:
-	ld a, [arrow_pos]
-	or a
-	jr z, end
-	dec a
-	ld [arrow_pos], a
-	jr end
-
-arrow_down:	
-	ld a, [arrow_pos]
-	cp 3
-	jr z, end
-	inc a
-	ld [arrow_pos], a
-	
-end:
-	call move_arrow
+	call handle_arrow
 	
 	jr Main
 	

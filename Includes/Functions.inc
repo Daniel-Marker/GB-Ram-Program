@@ -20,6 +20,27 @@ memcpy::
 	
 	ret
 
+;a = input: value to set, output: (n/a)
+;bc = input: number of bytes to write, output: (n/a)
+;de = input: destination, output: (n/a)
+;hl = input: (n/a), output: (n/a)
+;registers used: a, bc, de, l
+memset::
+	ld l, a
+	
+.loop:
+	ld a, l
+	ld [de], a
+	inc de
+	
+	dec bc
+	ld a, b
+	or c
+	
+	jr nz, .loop
+	
+	ret
+
 ;a = input: (n/a), output: (n/a)
 ;b = input: map height (1-32), output: (n/a)
 ;c = input: map width (1-32), output: (n/a)
@@ -54,35 +75,44 @@ load_map::
 ;bc = input: (n/a), output: (n/a)
 ;de = input: (n/a), output: (n/a)
 ;hl = input: (n/a), output: (n/a)
-;registers used: a
-move_arrow::
-	ld a, cArrowX
-	ld [_OAMRAM + 1], a
+;registers used: a, bc, de, hl
+handle_arrow::
+	ld a, [input_pressed]
+	
+	bit 6, a
+	jr nz, arrow_up
+	bit 7, a
+	jr nz, arrow_down
+	jr end
 
+arrow_up:
 	ld a, [arrow_pos]
 	or a
-	jr z, option_1		;0 or 0 = 0, so if arrow_pos = 0, then it will jump to option_1
-	cp 1
-	jr z, option_2
-	cp 2
-	jr z, option_3
-						;if the code gets to this point, arrow_pos is 3 or greater, so assume that it's 3
-option_4:	
-	ld a, cArrowOption4
-	jr move_sprite
-	
-option_1:
-	ld a, cArrowOption1
-	jr move_sprite
-	
-option_2:
-	ld a, cArrowOption2
-	jr move_sprite
+	jr z, end
+	dec a
+	ld [arrow_pos], a
+	jr end
 
-option_3:
-	ld a, cArrowOption3
+arrow_down:	
+	ld a, [arrow_pos]
+	cp 3
+	jr z, end
+	inc a
+	ld [arrow_pos], a
 	
-move_sprite:
+end:
+
+	ld a, cArrowX
+	ld [_OAMRAM + 1], a
+	
+	ld a, [arrow_pos]
+	ld b, a
+	ld e, cArrowDeltaY
+	ld hl, cArrowInitY
+	
+	call multiply
+	
+	ld a, l
 	ld [_OAMRAM], a
 	
 	ret
@@ -127,5 +157,33 @@ poll_input::
 	
 	ld a, b
 	ld [input_down], a
+	
+	ret
+
+;a = input: (n/a), output: (n/a)
+;b = input: multiplicand, output: (n/a)
+;c = input: (n/a), output: (n/a)
+;d = input: (n/a), output: (n/a)
+;e = input: multiplier, output: (n/a)
+;hl = input: (n/a), output: result + inital hl value
+;registers used: bc, de, hl
+multiply::
+	ld d, 0
+	ld c, 8
+
+loop:
+	bit 0, b
+	jr z, add_skip
+	
+	add hl, de
+	
+add_skip:
+	srl b
+	
+	sla e
+	rl d
+	
+	dec c
+	jr nz, loop
 	
 	ret

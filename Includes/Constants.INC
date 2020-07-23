@@ -5,11 +5,9 @@ cDefaultPalette		EQU %11100100
 cTileSizeInBytes	EQU 16	
 cNumTiles			EQU 38
 cArrowTile			EQU 37
-cArrowX				EQU 16 + 8 * 3
-cArrowOption1		EQU 16 + 7 * 8 
-cArrowOption2		EQU 16 + 8 * 8 
-cArrowOption3		EQU 16 + 9 * 8
-cArrowOption4		EQU 16 + 10 * 8
+cArrowX				EQU 8 + 8 * 2
+cArrowInitY			EQU 16 + 7 * 8
+cArrowDeltaY		EQU 8
 cUp					EQU $40	
 cDown				EQU $80	
 cLeft				EQU $20					
