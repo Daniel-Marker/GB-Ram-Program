@@ -5,3 +5,7 @@
 SECTION "RAM Vars",WRAM0[$C000]
 arrow_pos:
 db
+input_down:
+db
+input_pressed:
+db

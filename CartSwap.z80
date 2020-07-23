@@ -64,7 +64,32 @@ Start::
 	
 Main::
 	halt
+	
+	call poll_input
+	ld a, [input_pressed]
+	
+	bit 6, a
+	jr nz, arrow_up
+	bit 7, a
+	jr nz, arrow_down
+	jr end
 
+arrow_up:
+	ld a, [arrow_pos]
+	or a
+	jr z, end
+	dec a
+	ld [arrow_pos], a
+	jr end
+
+arrow_down:	
+	ld a, [arrow_pos]
+	cp 3
+	jr z, end
+	inc a
+	ld [arrow_pos], a
+	
+end:
 	call move_arrow
 	
 	jr Main
