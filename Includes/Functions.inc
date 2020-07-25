@@ -95,7 +95,7 @@ arrow_up:
 
 arrow_down:	
 	ld a, [arrow_pos]
-	cp 3
+	cp cNumOptions
 	jr z, end
 	inc a
 	ld [arrow_pos], a
@@ -187,3 +187,20 @@ add_skip:
 	jr nz, loop
 	
 	ret
+
+
+menu_start::
+	jr menu_start
+menu_start_end
+	
+menu_save::
+	jr menu_save
+menu_save_end
+
+menu_graphics::
+	jr menu_graphics
+menu_graphics_end
+
+menu_advGraphics::
+	jr menu_advGraphics	
+menu_advGraphics_end

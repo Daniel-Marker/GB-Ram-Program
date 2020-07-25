@@ -9,3 +9,6 @@ input_down:
 db
 input_pressed:
 db
+
+ram_program:
+ds 512
