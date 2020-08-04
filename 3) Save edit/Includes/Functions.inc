@@ -9,15 +9,7 @@ SECTION "Functions", ROM0
 ;hl = input: source, output: (n/a)
 ;registers used: a, bc, de, hl
 memcpy::
-	ld a, [hl+]
-	ld [de], a
-	inc de
-	
-	dec bc
-	ld a, b
-	or c
-	jr nz, memcpy
-	
+	MEMCPY
 	ret
 
 ;a = input: value to set, output: (n/a)
@@ -26,19 +18,7 @@ memcpy::
 ;hl = input: (n/a), output: (n/a)
 ;registers used: a, bc, de, l
 memset::
-	ld l, a
-	
-.loop:
-	ld a, l
-	ld [de], a
-	inc de
-	
-	dec bc
-	ld a, b
-	or c
-	
-	jr nz, .loop
-	
+	MEMSET
 	ret
 
 ;a = input: (n/a), output: (n/a)
@@ -164,15 +144,92 @@ menu_start_end
 menu_save::
 	WAIT_FOR_A
 	
-	;move this to 3) Save edit 
+	IF cReproCart == 1
+		;if cReproCart is 1, then we are building for a reprocart with flash memory
+		;so we can use this code ripped from the cartridge to load from flash into SRAM
+		
+		push af
+		ld a, $30
+		ld [$FFB8], a
+		ld [$2000], a
+		call $7C00
+		dec a
+		ld bc, $B8E0
+		ld [$2000], a
+		pop af
+	ENDC
 	
-	;firstly, we need to check how the flashcart loads/saves
-	;so we need to be able to display N bytes at a given memory address
-	;to do this, we could figure out how to display 0-F and then display each nibble as a character
+	ld a, cSaveRamBank
+	ld [rRAMB], a		;set the ram bank
 	
-.main_loop:
+	ld a, cRamEnable
+	ld [rRAMG], a		;and enable it
 	
-	jr .main_loop
+	ld hl, cNameLocation
+	
+	;Overwrite the existing name with "Green"
+	ld a, $86		;G
+	ld [hl+], a
+	ld a, $B1		;r
+	ld [hl+], a
+	ld a, $A4		;e
+	ld [hl+], a
+	ld a, $A4		;e
+	ld [hl+], a
+	ld a, $AD		;n
+	ld [hl+], a
+	ld a, $50		;terminator
+	ld [hl], a
+	
+	
+	xor a
+	ld hl, cNameLocation
+	ld bc, cChecksumLocation - cNameLocation
+	ld d, 0
+.loop:				;calculate checksum from cNameLocation to cChecksumLocation
+	ld a, [hl+]
+	add d
+	ld d, a
+	
+	dec bc
+	ld a, b
+	or c
+	jr nz, .loop
+	
+	ld a, d
+	cpl							;Inverse the checksum so that it matches the format used in the game
+	ld [cChecksumLocation], a
+	
+	IF cReproCart == 1
+		ld a, $1C
+		ld [rROMB0], a
+		
+		;if cReproCart is 1, then we are building for a reprocart with flash memory
+		;so we can use this code ripped from the cartridge to save to flash
+		
+		ld a, [$FFB8]
+		push af
+		call $0019
+		call $6100
+		call $DE00
+		call $0019
+		call $6200
+		call $DE00
+		call $0019
+		call $6300
+		call $DE00
+		call $0019
+		call $6400
+		call $DE00
+		call $0019
+		call $6500
+		call $DE00
+		pop af
+		
+		jp cFlashEntryPoint
+	ENDC
+	
+	jp cEntryPoint
 menu_save_end
 
 menu_graphics::
@@ -182,3 +239,70 @@ menu_graphics_end
 menu_advGraphics::
 	jr menu_advGraphics	
 menu_advGraphics_end
+
+memory_viewer::
+	WAIT_FOR_A
+
+	ld a, [rLCDC]
+	push af
+	xor a
+	ld [rLCDC], a		;turn off the screen
+	
+	ld bc, cLastVisibleTile - _SCRN0
+	ld de, _SCRN0
+	MEMSET				;clear the current map
+	
+	ld a, cBankToReadFrom
+	ld [rROMB0], a		;set the bank
+	
+	ld bc, cMemoryWidth * cMemoryHeight
+	ld de, buffer
+	ld hl, cMemoryToRead
+	MEMCPY				;copy cMemoryWidth * cMemoryHeight bytes into the buffer
+
+	
+	
+	ld b, cMemoryWidth
+	ld c, cMemoryHeight
+	ld de, buffer
+	ld hl, _SCRN0
+.loop:
+	ld a, [de]
+	inc de
+	
+	push de
+	
+	ld d, a
+	
+	and $F0
+	swap a
+	add cHexFirstTile
+	ld [hl+], a			;mask out lower nibble and add cHexFirstTile, so that a contains the tile no representing the hex digit
+	
+	ld a, d
+	and $0F
+	add cHexFirstTile
+	ld [hl+], a
+	
+	pop de
+	
+	
+	inc hl
+	dec b
+	jr nz, .loop
+	
+	push de
+	ld de, 11			;add 11 so that we are at the start of the next line
+	add hl, de
+	pop de
+	
+	ld b, cMemoryWidth
+	dec c
+	jr nz, .loop
+	
+	pop af
+	ld [rLCDC], a	;turn the screen back on
+	
+.main_loop:
+	jr .main_loop
+memory_viewer_end

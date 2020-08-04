@@ -21,6 +21,7 @@
 	INCLUDE "Assets/Screen.z80"
 	INCLUDE "Assets/PressA.z80"
 	INCLUDE "Assets/Tiles.z80"
+	INCLUDE "Assets/MemView.z80"
 
 ;****************************************************************************************************************************************************
 ;*	Program Start
@@ -42,6 +43,11 @@ Start::
 	ld bc, cNumTiles * cTileSizeInBytes
 	ld hl, TileData
 	ld de, _VRAM
+	call memcpy			;load tile data into VRAM
+	
+	ld bc, 16 * cTileSizeInBytes
+	ld hl, HexTiles
+	ld de, _VRAM + cTileSizeInBytes * cHexFirstTile ;$8400
 	call memcpy			;load tile data into VRAM
 	
 	xor a
@@ -126,8 +132,8 @@ load_graphics:
 	jr run_ram_program
 	
 load_advGraphics:
-	ld bc, menu_advGraphics_end - menu_advGraphics
-	ld hl, menu_advGraphics
+	ld bc, memory_viewer_end - memory_viewer
+	ld hl, memory_viewer
 	jr run_ram_program
 	
 run_ram_program:

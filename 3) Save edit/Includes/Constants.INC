@@ -18,4 +18,18 @@ cStart				EQU $08
 cSelect				EQU $04	
 cNumOptions			EQU 3
 cEntryPoint			EQU $0100
+cFlashEntryPoint	EQU $0150
 cEcho				EQU $E000
+cNameLocation		EQU $A598
+cSaveRamBank		EQU 1
+cRamEnable			EQU $0A
+cChecksumLocation	EQU $B523
+cLastVisibleTile	EQU $9A33
+cMemoryWidth		EQU 7
+cMemoryHeight		EQU 18
+cMemoryToRead		EQU $3FA6
+cBankToReadFrom		EQU $1C
+cHexFirstTile		EQU $40
+
+;cReproCart			EQU 1
+cReproCart			EQU 0

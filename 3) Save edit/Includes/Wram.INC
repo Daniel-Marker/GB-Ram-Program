@@ -14,3 +14,6 @@ db
 
 ram_program:
 ds 512
+
+buffer:
+ds 180

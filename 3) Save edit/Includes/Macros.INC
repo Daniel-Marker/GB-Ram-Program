@@ -2,7 +2,6 @@
 ;bc = input: (n/a), output: (n/a)
 ;de = input: (n/a), output: (n/a)
 ;hl = input: (n/a), output: (n/a)
-;Result stored in RAM
 ;registers used: a, b
 GET_INPUT: MACRO
 
@@ -49,24 +48,67 @@ ENDM
 ;hl = input: (n/a), output: (n/a)
 ;registers used: a, bc
 DELAY: MACRO
-.delay:
+.delay\@:
 	dec bc
 	ld a, b
 	or c
-	jr nz, .delay
+	jr nz, .delay\@
 
 ENDM
 
 
+;a = input: (n/a), output: (n/a)
+;bc = input: (n/a), output: (n/a)
+;de = input: (n/a), output: (n/a)
+;hl = input: (n/a), output: (n/a)
+;registers used: a, b, c
 WAIT_FOR_A: MACRO
 	di
 	ld bc, $FFFF
 	DELAY			;Wait for a short amount of time, so that input from options screen isn't immediately used again here
 	
-.loop:
+.wait_for_a\@:
 	GET_INPUT
 	ld a, [input_pressed]
 	and cA
 	or a
-	jr z, .loop
+	jr z, .wait_for_a\@
+ENDM
+
+;a = input: value to set, output: (n/a)
+;bc = input: number of bytes to write, output: (n/a)
+;de = input: destination, output: (n/a)
+;hl = input: (n/a), output: (n/a)
+;registers used: a, bc, de, l
+MEMSET: MACRO
+	ld l, a
+	
+.memset:
+	ld a, l
+	ld [de], a
+	inc de
+	
+	dec bc
+	ld a, b
+	or c
+	
+	jr nz, .memset
+	
+ENDM
+
+;a = input: (n/a), output: (n/a)
+;bc = input: number of bytes to copy, output: (n/a)
+;de = input: destination, output: (n/a)
+;hl = input: source, output: (n/a)
+;registers used: a, bc, de, hl
+MEMCPY: MACRO
+.memcpy:
+	ld a, [hl+]
+	ld [de], a
+	inc de
+	
+	dec bc
+	ld a, b
+	or c
+	jr nz, .memcpy
 ENDM
