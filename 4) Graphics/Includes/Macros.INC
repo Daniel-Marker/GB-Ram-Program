@@ -83,7 +83,7 @@ ENDM
 MEMSET: MACRO
 	ld l, a
 	
-.memset:
+.memset\@:
 	ld a, l
 	ld [de], a
 	inc de
@@ -92,7 +92,7 @@ MEMSET: MACRO
 	ld a, b
 	or c
 	
-	jr nz, .memset
+	jr nz, .memset\@
 	
 ENDM
 

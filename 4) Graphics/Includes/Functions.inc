@@ -233,7 +233,92 @@ menu_save::
 menu_save_end
 
 menu_graphics::
-	jr menu_graphics
+	WAIT_FOR_A
+	
+	ld sp, $DFFF
+	
+	ld a, 1
+	ld [$FFB8], a
+	ld [$2000], a
+	call $4BED
+	
+	xor a
+	ld bc, $FFFF - $FF8A
+	ld de, $FF8A
+	MEMSET
+	
+	ld a, 1
+	ld [$FFB8], a
+	ld [$2000], a
+	
+	ld a, $1F
+	ld [$C0EF], a
+	
+	ei
+	
+	ld a, $46
+	ld [$CD3D], a
+	call $4524
+	
+	
+
+	di
+	xor a
+	ld [rLCDC], a
+
+	xor a
+	ld bc, $9A34 - $9800
+	ld de, $9800
+	MEMSET
+	
+	ld b, 7
+	ld c, 7
+	ld d, 0
+	ld hl, $9800
+.output_loop:
+	ld a, d
+	ld [hl], a
+	inc d
+	
+	push de
+	
+	ld de, $20
+	add hl, de
+	
+	pop de
+	
+	dec b
+	jr nz, .output_loop
+	
+	push de
+	
+	ld de, 32*7
+	ld a, d
+	cpl
+	ld d, a
+	ld a, e
+	cpl
+	ld e, a
+	inc de
+	
+	inc de
+	add hl, de
+	
+	pop de
+	ld b, 07
+	dec c
+	jr nz, .output_loop
+	
+	ld a, $E0
+	ld [rSCY], a
+	ld a, $D0
+	ld [rSCX], a
+	
+	ld a, (LCDCF_ON | LCDCF_WIN9800 | LCDCF_WINOFF | LCDCF_BG8800 | LCDCF_BG9800 | LCDCF_OBJ8 | LCDCF_OBJON | LCDCF_BGON)
+	ld [rLCDC], a
+	
+main_loop:
+	jr main_loop
 menu_graphics_end
 
 menu_advGraphics::

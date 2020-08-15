@@ -12,8 +12,9 @@ ram_after_input:
 arrow_pos:
 db
 
-ram_program:
-ds 512
-
 buffer:
 ds 180
+
+SECTION "RAM Program", WRAM0 [$C100]
+ram_program:
+ds 512
