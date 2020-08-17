@@ -1,1 +1,2 @@
 Text source: https://opengameart.org/content/squont8
+Label names for graphics code: https://github.com/pret/pokered

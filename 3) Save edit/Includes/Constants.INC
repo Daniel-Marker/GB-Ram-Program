@@ -16,7 +16,7 @@ cA					EQU $01
 cB					EQU $02	
 cStart				EQU $08	
 cSelect				EQU $04	
-cNumOptions			EQU 3
+cNumOptions			EQU 2
 cEntryPoint			EQU $0100
 cFlashEntryPoint	EQU $0150
 cEcho				EQU $E000
