@@ -33,3 +33,18 @@ cHexFirstTile		EQU $40
 
 ;cReproCart			EQU 1
 cReproCart			EQU 0
+
+
+WriteDMACodeToHRAM	EQU $4BED
+hLoadedROMBank 		EQU $FFB8
+wTitleMonSpecies	EQU $CD3D
+LoadTitleMonSprite	EQU $4524
+cDoduo				EQU $46
+cHDMAFuncLength		EQU $0A
+wStack				EQU $DFFF
+wAudioROMBank		EQU $C0EF
+cTitleAudioBank		EQU $1F
+cPokemonWidth		EQU 7
+cPokemonHeight		EQU 7
+cWindowX			EQU $D0
+cWindowY			EQU $E0

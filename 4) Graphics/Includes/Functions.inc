@@ -235,46 +235,43 @@ menu_save_end
 menu_graphics::
 	WAIT_FOR_A
 	
-	ld sp, $DFFF
+	ld sp, wStack				;Move the stack pointer to the bottom of WRAM so that it doesn't cause problems
 	
 	ld a, 1
-	ld [$FFB8], a
-	ld [$2000], a
-	call $4BED
+	ld [hLoadedROMBank], a		;Set the loaded rom bank so that code can correctly get back to the right bank
+	ld [rROMB0], a				
+	call WriteDMACodeToHRAM
 	
 	xor a
-	ld bc, $FFFF - $FF8A
-	ld de, $FF8A
-	MEMSET
+	ld bc, $FFFF - (_HRAM + cHDMAFuncLength)
+	ld de, _HRAM + cHDMAFuncLength
+	MEMSET						;Clear HRAM (excluding the DMA code)
 	
-	ld a, 1
-	ld [$FFB8], a
-	ld [$2000], a
-	
-	ld a, $1F
-	ld [$C0EF], a
+	ld a, cTitleAudioBank
+	ld [wAudioROMBank], a
 	
 	ei
 	
-	ld a, $46
-	ld [$CD3D], a
-	call $4524
+	ld a, cDoduo
+	ld [wTitleMonSpecies], a
+	call LoadTitleMonSprite
 	
 	
-
 	di
 	xor a
 	ld [rLCDC], a
 
 	xor a
-	ld bc, $9A34 - $9800
-	ld de, $9800
-	MEMSET
+	ld bc, cLastVisibleTile - _SCRN0
+	ld de, _SCRN0
+	MEMSET						;Clear the screen
 	
-	ld b, 7
-	ld c, 7
+	;the below code produces the tilemap expected for pokemon:
+	
+	ld b, cPokemonHeight
+	ld c, cPokemonWidth
 	ld d, 0
-	ld hl, $9800
+	ld hl, _SCRN0
 .output_loop:
 	ld a, d
 	ld [hl], a
@@ -282,7 +279,7 @@ menu_graphics::
 	
 	push de
 	
-	ld de, $20
+	ld de, $20		;add $20 so that hl points to the tile beneath the current one
 	add hl, de
 	
 	pop de
@@ -299,19 +296,20 @@ menu_graphics::
 	ld a, e
 	cpl
 	ld e, a
-	inc de
+	inc de			;de = cpl(de) + 1, so de = -32*7
 	
-	inc de
-	add hl, de
+	inc de			;inc so de = -32*7 + 1
+	add hl, de		;hl = hl - 32*7 + 1, so that it goes back to the start of the column, then moves to the next row
+					;so, hl now points to the first tile of the next row
 	
 	pop de
-	ld b, 07
+	ld b, cPokemonHeight
 	dec c
 	jr nz, .output_loop
 	
-	ld a, $E0
+	ld a, cWindowY
 	ld [rSCY], a
-	ld a, $D0
+	ld a, cWindowX
 	ld [rSCX], a
 	
 	ld a, (LCDCF_ON | LCDCF_WIN9800 | LCDCF_WINOFF | LCDCF_BG8800 | LCDCF_BG9800 | LCDCF_OBJ8 | LCDCF_OBJON | LCDCF_BGON)
