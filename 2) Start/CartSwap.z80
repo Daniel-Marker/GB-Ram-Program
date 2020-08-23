@@ -106,9 +106,7 @@ Main::
 	jr z, load_start
 	cp 1
 	jr z, load_save
-	cp 2
-	jr z, load_graphics
-	jr load_advGraphics
+	jr load_graphics
 
 load_start:	
 	ld bc, menu_start_end - menu_start
@@ -123,11 +121,6 @@ load_save:
 load_graphics:
 	ld bc, menu_graphics_end - menu_graphics
 	ld hl, menu_graphics
-	jr run_ram_program
-	
-load_advGraphics:
-	ld bc, menu_advGraphics_end - menu_advGraphics
-	ld hl, menu_advGraphics
 	jr run_ram_program
 	
 run_ram_program:

@@ -178,7 +178,3 @@ menu_save_end
 menu_graphics::
 	jr menu_graphics
 menu_graphics_end
-
-menu_advGraphics::
-	jr menu_advGraphics	
-menu_advGraphics_end

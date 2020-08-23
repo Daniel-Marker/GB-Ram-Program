@@ -235,7 +235,7 @@ menu_save_end
 menu_graphics::
 	WAIT_FOR_A
 	
-	ld sp, wStack				;Move the stack pointer to the bottom of WRAM so that it doesn't cause problems
+	ld sp, wStack				;Move the stack pointer to the bottom of WRAM so that it doesn't overflow
 	
 	ld a, 1
 	ld [hLoadedROMBank], a		;Set the loaded rom bank so that code can correctly get back to the right bank
@@ -318,10 +318,6 @@ menu_graphics::
 main_loop:
 	jr main_loop
 menu_graphics_end
-
-menu_advGraphics::
-	jr menu_advGraphics	
-menu_advGraphics_end
 
 memory_viewer::
 	WAIT_FOR_A

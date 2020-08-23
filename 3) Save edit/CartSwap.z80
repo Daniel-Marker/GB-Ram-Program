@@ -114,7 +114,7 @@ Main::
 	jr z, load_save
 	cp 2
 	jr z, load_graphics
-	jr load_advGraphics
+	jr load_memView
 
 load_start:	
 	ld bc, menu_start_end - menu_start
@@ -131,7 +131,7 @@ load_graphics:
 	ld hl, menu_graphics
 	jr run_ram_program
 	
-load_advGraphics:
+load_memView:
 	ld bc, memory_viewer_end - memory_viewer
 	ld hl, memory_viewer
 	jr run_ram_program
